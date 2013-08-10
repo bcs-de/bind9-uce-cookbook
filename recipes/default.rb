@@ -132,37 +132,39 @@ search(:zones).each do |zone|
     end
   end
 
-  template File.join(node[:bind9][:zones_path], zone['domain']) do
-    source File.join(node[:bind9][:zones_path], "#{zone['domain']}.erb")
-    local true
-    owner node[:bind9][:user]
-    group node[:bind9][:user]
-    mode 0644
-    notifies :restart, "service[bind9]"
-    variables({
-      :serial => zone['zone_info']['serial'] || Time.new.strftime("%Y%m%d%H%M%S")
-    })
-    action :nothing
-  end
+  if zone["type"] == "master" then
+    template File.join(node[:bind9][:zones_path], zone['domain']) do
+      source File.join(node[:bind9][:zones_path], "#{zone['domain']}.erb")
+      local true
+      owner node[:bind9][:user]
+      group node[:bind9][:user]
+      mode 0644
+      notifies :restart, "service[bind9]"
+      variables({
+        :serial => zone['zone_info']['serial'] || Time.new.strftime("%Y%m%d%H%M%S")
+      })
+      action :nothing
+    end
 
-  template File.join(node[:bind9][:zones_path], "#{zone['domain']}.erb") do
-    source "zonefile.erb"
-    owner node[:bind9][:user]
-    group node[:bind9][:user]
-    mode 0644
-    variables({
-      :domain => zone['domain'],
-      :soa => zone['zone_info']['soa'],
-      :contact => zone['zone_info']['contact'],
-      :global_ttl => zone['zone_info']['global_ttl'],
-      :nameserver => zone['zone_info']['nameserver'],
-      :mail_exchange => zone['zone_info']['mail_exchange'],
-      :records => zone['zone_info']['records'].sort do |a, b|
-        a['ip'] <=> b['ip'] if a['name'] == b['name']
-        a['name'] <=> b['name']
-      end
-    })
-    notifies :create, resources(template: File.join(node[:bind9][:zones_path], zone[:domain])), :immediately
+    template File.join(node[:bind9][:zones_path], "#{zone['domain']}.erb") do
+      source "zonefile.erb"
+      owner node[:bind9][:user]
+      group node[:bind9][:user]
+      mode 0644
+      variables({
+        :domain => zone['domain'],
+        :soa => zone['zone_info']['soa'],
+        :contact => zone['zone_info']['contact'],
+        :global_ttl => zone['zone_info']['global_ttl'],
+        :nameserver => zone['zone_info']['nameserver'],
+        :mail_exchange => zone['zone_info']['mail_exchange'],
+        :records => zone['zone_info']['records'].sort do |a, b|
+          a['ip'] <=> b['ip'] if a['name'] == b['name']
+          a['name'] <=> b['name']
+        end
+      })
+      notifies :create, resources(template: File.join(node[:bind9][:zones_path], zone[:domain])), :immediately
+    end
   end
 end
 
