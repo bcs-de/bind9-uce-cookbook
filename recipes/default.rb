@@ -119,16 +119,16 @@ directory node[:bind9][:zones_path] do
 end
 
 search(:zones).each do |zone|
-  #unless zone['autodomain'].nil? || zone['autodomain'] == ''
-  #  search(:node, "domain:#{zone['autodomain']}").each do |host|
-  #    next if host['ipaddress'] == '' || host['ipaddress'].nil?
-  #    zone['zone_info']['records'].push( {
-  #      "name" => host['hostname'],
-  #      "type" => "A",
-  #      "ip" => host['ipaddress']
-  #    })
-  #  end
-  #end
+  unless zone['autodomain'].nil? || zone['autodomain'] == ''
+    search(:node, "domain:#{zone['autodomain']}").each do |host|
+      next if host['ipaddress'] == '' || host['ipaddress'].nil?
+      zone['zone_info']['records'].push( {
+        "name" => host['hostname'],
+        "type" => "A",
+        "ip" => host['ipaddress']
+      })
+    end
+  end
 
   template File.join(node[:bind9][:zones_path], zone['domain']) do
     source File.join(node[:bind9][:zones_path], "#{zone['domain']}.erb")
