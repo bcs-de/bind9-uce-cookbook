@@ -120,6 +120,7 @@ directory node[:bind9][:zones_path] do
 end
 
 search(:zones).each do |zone|
+  Chef::Log.info("Got zone #{zone[:domain]}")
   unless zone['autodomain'].nil? || zone['autodomain'] == ''
     search(:node, "domain:#{zone['autodomain']}").each do |host|
       next if host['ipaddress'] == '' || host['ipaddress'].nil?
@@ -157,8 +158,8 @@ search(:zones).each do |zone|
       :nameserver => zone['zone_info']['nameserver'],
       :mail_exchange => zone['zone_info']['mail_exchange'],
       :records => zone['zone_info']['records'].sort do |a, b|
-        return a['ip'] <=> b['ip'] if a['name'] == b['name']
-        return a['name'] <=> b['name']
+        a['ip'] <=> b['ip'] if a['name'] == b['name']
+        a['name'] <=> b['name']
       end
     })
     notifies :create, resources(template: File.join(node[:bind9][:zones_path], zone[:domain])), :immediately
