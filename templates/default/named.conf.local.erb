@@ -6,10 +6,12 @@
 // organization
 //include "/etc/bind/zones.rfc1918";
 
-<% @zonefiles.each do |conf| -%>
+<% @zonefiles.reject{ |z| z[:type] != 'master' && z[:type] != 'slave' }.each do |conf| -%>
 zone "<%= conf["domain"] %>" IN {
   type <%= conf["type"] %>;
-  file "<%= node[:bind9][:config_path] %>/<%= conf["domain"] %><%= conf["type"] == "slave" ? ".slave" : "" %>";
+  <%- if conf['type'] == 'master' %>
+  file "<%= node[:bind9][:zones_path] %>/<%= conf["domain"] %><%= conf["type"] == "slave" ? ".slave" : "" %>";
+  <%- end %>
 <% if conf["type"] == "master" -%>
   allow-transfer {
   <% conf["allow_transfer"].each do |ip| -%>
