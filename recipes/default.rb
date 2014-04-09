@@ -56,7 +56,7 @@ directory File.join(node[:bind9][:chroot_dir].to_s, node[:bind9][:zones_path]) d
 end
 
 if !node[:bind9][:chroot_dir].nil?
-  include_recipe "bind9-uce::chroot"
+  include_recipe("bind9-uce::chroot")
 end
 
 # class Chef::Recipe::NameServer
@@ -64,7 +64,7 @@ end
 # end
 
 if node[:bind9][:resolvconf]
-  include_recipe "resolvconf"
+  include_recipe("resolvconf")
   # file "/etc/resolvconf/resolv.conf.d/tail" do
   #   content NameServer.nameserver_proxy("/etc/resolv.conf", /nameserver.*/)
   #   only_if { !::File.exists?("/etc/resolvconf/resolv.conf.d/tail")  }
