@@ -6,20 +6,25 @@
 // organization
 //include "/etc/bind/zones.rfc1918";
 
-<% @zonefiles.reject{ |z| z[:type] != 'master' && z[:type] != 'slave' }.each do |conf| -%>
+<% @zonefiles.each do |conf| -%>
 zone "<%= conf["domain"] %>" IN {
   type <%= conf["type"] %>;
-  <%- if conf['type'] == 'master' %>
-  file "<%= node[:bind9][:zones_path] %>/<%= conf["domain"] %><%= conf["type"] == "slave" ? ".slave" : "" %>";
-  <%- end %>
 <% if conf["type"] == "master" -%>
+  file "<%= node[:bind9][:zones_path] %>/<%= conf["domain"] %>";
   allow-transfer {
   <% conf["allow_transfer"].each do |ip| -%>
     <%= ip %>;
   <% end -%>
   };
 <% elsif conf["type"] == "slave" -%>
+  file "<%= node[:bind9][:zones_path] %>/<%= conf["domain"] %>.slave";
   masters {
+  <% conf["masters"].each do |ip| -%>
+    <%= ip %>;
+  <% end -%>
+  };
+<% elsif conf["type"] == "forward" -%>
+  forwarders {
   <% conf["masters"].each do |ip| -%>
     <%= ip %>;
   <% end -%>

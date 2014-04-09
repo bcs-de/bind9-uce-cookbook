@@ -56,7 +56,7 @@ directory File.join(node[:bind9][:chroot_dir].to_s, node[:bind9][:zones_path]) d
 end
 
 if !node[:bind9][:chroot_dir].nil?
-  include_recipe "bind9-chroot::chroot"
+  include_recipe "bind9-uce::chroot"
 end
 
 # class Chef::Recipe::NameServer
@@ -71,7 +71,11 @@ if node[:bind9][:resolvconf]
   # end
 end
 
-include_recipe('bind9-reversezones::reverse_zones')
+masterzones = search(:zones, 'type:master')
+slavezones = search(:zones, 'type:slave')
+forwardzones = search(:zones, 'type:forward')
+
+include_recipe('bind9-uce::reverse_zones')
 
 template File.join(node[:bind9][:config_path], node[:bind9][:options_file]) do
   source "named.conf.options.erb"
@@ -95,7 +99,7 @@ template File.join(node[:bind9][:config_path], node[:bind9][:local_file]) do
   group node[:bind9][:user]
   mode 0644
   variables({
-    :zonefiles => search(:zones) + search(:reversezones)
+    :zonefiles => masterzones + slavezones + forwardzones + search(:reversezones)
   })
   notifies :restart, "service[bind9]"
 end
@@ -111,15 +115,15 @@ template node[:bind9][:defaults_file] do
 end
 
 
-directory node[:bind9][:zones_path] do
-  owner node[:bind9][:user]
-  group node[:bind9][:user]
-  mode  0744
-  recursive true
-  not_if { ::File.directory?(node[:bind9][:zones_path]) or ::File.symlink?(node[:bind9][:zones_path]) }
-end
+#directory node[:bind9][:zones_path] do
+#  owner node[:bind9][:user]
+#  group node[:bind9][:user]
+#  mode  0744
+#  recursive true
+#  not_if { ::File.directory?(node[:bind9][:zones_path]) or ::File.symlink?(node[:bind9][:zones_path]) }
+#end
 
-search(:zones).each do |zone|
+masterzones.each do |zone|
   Chef::Log.info("Got zone #{zone[:domain]}")
   unless zone['autodomain'].nil? || zone['autodomain'] == ''
     search(:node, "domain:#{zone['autodomain']}").each do |host|
@@ -168,6 +172,6 @@ search(:zones).each do |zone|
   end
 end
 
-service "bind9" do
-  action [ :start ]
-end
+#service "bind9" do
+#  action [ :start ]
+#end

@@ -16,7 +16,7 @@ options {
     };
 
     allow-transfer {
-      "<%= node[:bind9][:allow_transfer] %>";
+      <%= node[:bind9][:allow_transfer] %>;
     };
 
   <% if node[:bind9][:allow_update] %>

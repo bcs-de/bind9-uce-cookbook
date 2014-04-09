@@ -17,13 +17,13 @@
 #
 
 
-directory node[:bind9][:zones_path] do
-  owner node[:bind9][:user]
-  group node[:bind9][:user]
-  mode  0744
-  recursive true
-  not_if { ::File.directory?(node[:bind9][:zones_path]) or ::File.symlink?(node[:bind9][:zones_path]) }
-end
+#directory node[:bind9][:zones_path] do
+#  owner node[:bind9][:user]
+#  group node[:bind9][:user]
+#  mode  0744
+#  recursive true
+#  not_if { ::File.directory?(node[:bind9][:zones_path]) or ::File.symlink?(node[:bind9][:zones_path]) }
+#end
 
 search(:reversezones).each do |zone|
   Chef::Log.info("Got reverse-zone #{zone[:domain]}")
