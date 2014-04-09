@@ -6,6 +6,6 @@ gem 'rspec_junit_formatter'
 gem 'chefspec', '~> 3.4'
 
 group :style do
-  gem 'foodcritic', '> 3.0.0'
+  gem 'foodcritic'
   gem 'rubocop-checkstyle_formatter', require: false
 end
