@@ -1,13 +1,25 @@
+# UCE TODO and Ideas
+
+ - [ ] Define and check support for master zones
+ - [ ] Define and check reverse zones
+ - [ ] Define and implement forward zones
+ - [ ] Define and implement reverse zones
+ - [ ] Select which databags to use for the zones
+ - [ ] Filter the zones within each data bag on a per host-basis
+ - [ ] ChefSpec and test-kitchen
+
+UCE = Ultimate Cookbook Edition, our rewrite to deploy bind9 the way we needed.
+
 #Description
 
-This cookbook takes care of the installation and configuration of BIND9. You're able to define some global variables and manage your zonefiles via data bags (json example below).
+~~This cookbook takes care of the installation and configuration of BIND9. You're able to define some global variables and manage your zonefiles via data bags (json example below).
 It also supports automatic serial number generation and automatic resource records for chef nodes (see optional json in example below)
-No DNSSEC, no configurable logging, no rndc shell operations or other safety checks (named-checkconf, etc.).
+No DNSSEC, no configurable logging, no rndc shell operations or other safety checks (named-checkconf, etc.).~~
 
-If you want to help feel free to contribute (either here or at [Mike Adolphs's cookbook](https://github.com/fooforge/chef-cookbook_bind9), which this is based on)!
+~~If you want to help feel free to contribute (either here or at [Mike Adolphs's cookbook](https://github.com/fooforge/chef-cookbook_bind9), which this is based on)!~~
 
 **DISCLAIMER**:  
-It works on my setup!
+This is work in progress!
 
 #Requirements
 
@@ -136,4 +148,4 @@ An example of a data bag with mail records and specific IPs.
     
 #Contributions
 
-This cookbook is derived from [Mike Adolphs's](https://github.com/fooforge/chef-cookbook_bind9), and specific contributions can be tracked via git.
+This cookbook is derived from [tnarik's](https://github.com/tnarik/chef-cookbook_bind9-chroot) and [Mike Adolphs's](https://github.com/fooforge/chef-cookbook_bind9).

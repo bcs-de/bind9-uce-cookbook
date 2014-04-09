@@ -59,16 +59,16 @@ if !node[:bind9][:chroot_dir].nil?
   include_recipe "bind9-chroot::chroot"
 end
 
-class Chef::Recipe::NameServer
-  include LeCafeAutomatique::Bind9::NameServer
-end
+# class Chef::Recipe::NameServer
+#   include LeCafeAutomatique::Bind9::NameServer
+# end
 
 if node[:bind9][:resolvconf]
   include_recipe "resolvconf"
- # file "/etc/resolvconf/resolv.conf.d/tail" do
- #   content NameServer.nameserver_proxy("/etc/resolv.conf", /nameserver.*/)
- #   only_if { !::File.exists?("/etc/resolvconf/resolv.conf.d/tail")  }
- # end
+  # file "/etc/resolvconf/resolv.conf.d/tail" do
+  #   content NameServer.nameserver_proxy("/etc/resolv.conf", /nameserver.*/)
+  #   only_if { !::File.exists?("/etc/resolvconf/resolv.conf.d/tail")  }
+  # end
 end
 
 include_recipe('bind9-reversezones::reverse_zones')
