@@ -72,7 +72,12 @@ if node[:bind9][:resolvconf]
 end
 
 masterzones = search(:zones, 'type:master')
-slavezones = search(:zones, 'type:slave')
+masterzonedomains = masterzones.map { |z| z[:domain] }
+slavesearch = 'type:slave'
+masterzonedomains.each do |z|
+  slavesearch = "#{slavesearch} AND NOT domain:#{z}"
+end
+slavezones = search(:zones, slavesearch)
 forwardzones = search(:zones, 'type:forward')
 
 include_recipe('bind9-uce::reverse_zones')

@@ -8,6 +8,7 @@ describe 'master zones' do
     stub_search('reversezones', '*:*').and_return([])
     stub_search('zones', 'type:master') { ZoneData::MASTERZONES }
     stub_search('zones', 'type:slave').and_return([])
+    stub_search('zones', 'type:slave AND NOT domain:zone1.example.com AND NOT domain:zone2.example.com').and_return([])
     stub_search('zones', 'type:forward').and_return([])
   end
 
