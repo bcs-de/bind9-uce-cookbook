@@ -16,14 +16,14 @@
 # limitations under the License.
 #
 
-
-#directory node[:bind9][:zones_path] do
-#  owner node[:bind9][:user]
-#  group node[:bind9][:user]
-#  mode  0744
-#  recursive true
-#  not_if { ::File.directory?(node[:bind9][:zones_path]) or ::File.symlink?(node[:bind9][:zones_path]) }
-#end
+# directory node[:bind9][:zones_path] do
+#   owner node[:bind9][:user]
+#   group node[:bind9][:user]
+#   mode  0744
+#   recursive true
+#   not_if { ::File.directory?(node[:bind9][:zones_path]) or \
+#     ::File.symlink?(node[:bind9][:zones_path]) }
+# end
 
 search(:reversezones).each do |zone|
   Chef::Log.info("Got reverse-zone #{zone[:domain]}")
@@ -31,14 +31,15 @@ search(:reversezones).each do |zone|
     zoneip = zone['domain'].scan(/[0-9]+/).join('.')
     search(:node, "ipaddress:#{zone['autodomain']}*").each do |host|
       next if host['ipaddress'] == '' || host['ipaddress'].nil?
-      zone['zone_info']['records'].push( {
-        "name" => host['fqdn'] || "#{host['name']}.#{host['domain']}",
-        "type" => "PTR",
-        "ip" => host['ipaddress'].scan(/[0-9]{1,3}/).reverse().join('.').sub!(/\.#{zoneip}$/, '')
-      })
+      zone['zone_info']['records'].push(
+        'name' => host['fqdn'] || "#{host['name']}.#{host['domain']}",
+        'type' => 'PTR',
+        'ip' => host['ipaddress'].scan(/[0-9]{1,3}/) \
+          .reverse.join('.').sub!(/\.#{zoneip}$/, '')
+      )
     end
   end
-  if not zone['domain'].end_with?('.IN-ADDR.ARPA')
+  unless zone['domain'].end_with?('.IN-ADDR.ARPA')
     zone['domain'] += '.IN-ADDR.ARPA'
   end
 
@@ -48,30 +49,33 @@ search(:reversezones).each do |zone|
     owner node[:bind9][:user]
     group node[:bind9][:user]
     mode 0644
-    notifies :restart, "service[bind9]"
-    variables({
-      :serial => zone['zone_info']['serial'] || Time.new.strftime("%Y%m%d%H%M%S")
-    })
+    notifies :restart, 'service[bind9]'
+    variables(
+      serial: zone['zone_info']['serial'] || \
+        Time.new.strftime('%Y%m%d%H%M%S')
+    )
     action :nothing
   end
 
   template File.join(node[:bind9][:zones_path], "#{zone['domain']}.erb") do
-    source "reverse_zonefile.erb"
+    source 'reverse_zonefile.erb'
     owner node[:bind9][:user]
     group node[:bind9][:user]
     mode 0644
-    variables({
-      :domain => zone['domain'],
-      :soa => zone['zone_info']['soa'],
-      :contact => zone['zone_info']['contact'],
-      :global_ttl => zone['zone_info']['global_ttl'],
-      :nameserver => zone['zone_info']['nameserver'],
-      :mail_exchange => zone['zone_info']['mail_exchange'],
-      :records => zone['zone_info']['records'].sort do |a, b|
+    variables(
+      domain: zone['domain'],
+      soa: zone['zone_info']['soa'],
+      contact: zone['zone_info']['contact'],
+      global_ttl: zone['zone_info']['global_ttl'],
+      nameserver: zone['zone_info']['nameserver'],
+      mail_exchange: zone['zone_info']['mail_exchange'],
+      records: zone['zone_info']['records'].sort do |a, b|
         a['name'] <=> b['name'] if a['ip'] == b['ip']
         a['ip'] <=> b['ip']
       end
-    })
-    notifies :create, resources(:template => File.join(node[:bind9][:zones_path], zone['domain'])), :immediately
+    )
+    notifies :create, resources(
+      template: File.join(node[:bind9][:zones_path], zone['domain'])
+    ), :immediately
   end
 end

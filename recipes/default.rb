@@ -17,18 +17,18 @@
 # limitations under the License.
 #
 
-package "bind9" do
+package 'bind9' do
   case node[:platform]
-  when "centos", "redhat", "suse", "fedora"
-    package_name "bind"
+  when 'centos', 'redhat', 'suse', 'fedora'
+    package_name 'bind'
   end
   action :install
 end
 
-service "bind9" do
+service 'bind9' do
   case node[:platform]
-  when "centos", "redhat"
-    service_name "named"
+  when 'centos', 'redhat'
+    service_name 'named'
   end
   supports :status => true, :reload => true, :restart => true
   action [ :enable ]
@@ -56,7 +56,7 @@ directory File.join(node[:bind9][:chroot_dir].to_s, node[:bind9][:zones_path]) d
 end
 
 if !node[:bind9][:chroot_dir].nil?
-  include_recipe("bind9-uce::chroot")
+  include_recipe('bind9-uce::chroot')
 end
 
 # class Chef::Recipe::NameServer
@@ -64,10 +64,10 @@ end
 # end
 
 if node[:bind9][:resolvconf]
-  include_recipe("resolvconf")
-  # file "/etc/resolvconf/resolv.conf.d/tail" do
-  #   content NameServer.nameserver_proxy("/etc/resolv.conf", /nameserver.*/)
-  #   only_if { !::File.exists?("/etc/resolvconf/resolv.conf.d/tail")  }
+  include_recipe('resolvconf')
+  # file '/etc/resolvconf/resolv.conf.d/tail' do
+  #   content NameServer.nameserver_proxy('/etc/resolv.conf', /nameserver.*/)
+  #   only_if { !::File.exists?('/etc/resolvconf/resolv.conf.d/tail')  }
   # end
 end
 
@@ -78,39 +78,39 @@ forwardzones = search(:zones, 'type:forward')
 include_recipe('bind9-uce::reverse_zones')
 
 template File.join(node[:bind9][:config_path], node[:bind9][:options_file]) do
-  source "named.conf.options.erb"
+  source 'named.conf.options.erb'
   owner node[:bind9][:user]
   group node[:bind9][:user]
   mode 0644
-  notifies :restart, "service[bind9]"
+  notifies :restart, 'service[bind9]'
 end
 
 template File.join(node[:bind9][:config_path], node[:bind9][:config_file]) do
-  source "named.conf.erb"
+  source 'named.conf.erb'
   owner node[:bind9][:user]
   group node[:bind9][:user]
   mode 0644
-  notifies :restart, "service[bind9]"
+  notifies :restart, 'service[bind9]'
 end
 
 template File.join(node[:bind9][:config_path], node[:bind9][:local_file]) do
-  source "named.conf.local.erb"
+  source 'named.conf.local.erb'
   owner node[:bind9][:user]
   group node[:bind9][:user]
   mode 0644
   variables({
     :zonefiles => masterzones + slavezones + forwardzones + search(:reversezones)
   })
-  notifies :restart, "service[bind9]"
+  notifies :restart, 'service[bind9]'
 end
 
 
 template node[:bind9][:defaults_file] do
-  source "bind9.erb"
+  source 'bind9.erb'
   owner node[:bind9][:user]
   group node[:bind9][:user]
   mode 0644
-  notifies :restart, "service[bind9]"
+  notifies :restart, 'service[bind9]'
   not_if { node[:bind9][:defaults_file].nil? }
 end
 
@@ -129,29 +129,29 @@ masterzones.each do |zone|
     search(:node, "domain:#{zone['autodomain']}").each do |host|
       next if host['ipaddress'] == '' || host['ipaddress'].nil?
       zone['zone_info']['records'].push( {
-        "name" => host['hostname'],
-        "type" => "A",
-        "ip" => host['ipaddress']
+        'name' => host['hostname'],
+        'type' => 'A',
+        'ip' => host['ipaddress']
       })
     end
   end
 
-  if zone["type"] == "master" then
+  if zone['type'] == 'master' then
     template File.join(node[:bind9][:zones_path], zone['domain']) do
       source File.join(node[:bind9][:zones_path], "#{zone['domain']}.erb")
       local true
       owner node[:bind9][:user]
       group node[:bind9][:user]
       mode 0644
-      notifies :restart, "service[bind9]"
+      notifies :restart, 'service[bind9]'
       variables({
-        :serial => zone['zone_info']['serial'] || Time.new.strftime("%Y%m%d%H%M%S")
+        :serial => zone['zone_info']['serial'] || Time.new.strftime('%Y%m%d%H%M%S')
       })
       action :nothing
     end
 
     template File.join(node[:bind9][:zones_path], "#{zone['domain']}.erb") do
-      source "zonefile.erb"
+      source 'zonefile.erb'
       owner node[:bind9][:user]
       group node[:bind9][:user]
       mode 0644
@@ -172,6 +172,6 @@ masterzones.each do |zone|
   end
 end
 
-#service "bind9" do
+#service 'bind9' do
 #  action [ :start ]
 #end
