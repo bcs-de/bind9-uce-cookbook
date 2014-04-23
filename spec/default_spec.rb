@@ -28,9 +28,12 @@ describe 'bind9-uce::default' do
       .with_content(/allow-transfer {\n[ ]+none;/)
     expect(chef_run).to render_file('/etc/bind/named.conf.local') \
       .with_content('//include "/etc/bind/zones.rfc1918";')
-
   end
 
+  it 'creates the basic directories for cache and logging' do
+    expect(chef_run).to create_directory('/var/log/bind')
+    expect(chef_run).to create_directory('/var/cache/bind')
+  end
 end
 
 describe 'bind9-uce::default with chroot' do
